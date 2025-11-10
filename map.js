@@ -14,3 +14,39 @@ const map = new mapboxgl.Map({
   maxZoom: 18
 });
 map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+
+const bikeLinePaint = {
+  'line-color': '#32D400',
+  'line-width': 3,
+  'line-opacity': 0.4
+};
+
+map.on('load', async () => {
+  // --- Boston ---
+  map.addSource('boston_route', {
+    type: 'geojson',
+    data: 'https://bostonopendata-boston.opendata.arcgis.com/datasets/boston::existing-bike-network-2022.geojson'
+  });
+
+  map.addLayer({
+    id: 'bike-lanes-boston',
+    type: 'line',
+    source: 'boston_route',
+    paint: bikeLinePaint
+  });
+
+  // --- Cambridge ---
+  const CAMBRIDGE_URL = 'https://raw.githubusercontent.com/cambridgegis/cambridgegis_data/main/Recreation/Bike_Facilities/RECREATION_BikeFacilities.geojson';
+  map.addSource('cambridge_route', {
+    type: 'geojson',
+    data: CAMBRIDGE_URL
+  });
+
+  map.addLayer({
+    id: 'bike-lanes-cambridge',
+    type: 'line',
+    source: 'cambridge_route',
+    paint: bikeLinePaint
+  });
+});
