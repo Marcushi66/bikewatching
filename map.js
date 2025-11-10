@@ -1,5 +1,7 @@
 // Import Mapbox as an ESM module
 import mapboxgl from 'https://cdn.jsdelivr.net/npm/mapbox-gl@2.15.0/+esm';
+import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
+const INPUT_BLUEBIKES_JSON_URL = 'https://dsc106.com/labs/lab07/data/bluebikes-stations.json';
 
 // Check that Mapbox GL JS is loaded
 console.log('Mapbox GL JS Loaded:', mapboxgl);
@@ -50,3 +52,48 @@ map.on('load', async () => {
     paint: bikeLinePaint
   });
 });
+
+
+// Create an SVG overlay on top of the Mapbox map
+const svg = d3.select('#map').select('svg');
+
+function getCoords(station) {
+    const point = new mapboxgl.LngLat(+station.lon, +station.lat);
+    const { x, y } = map.project(point);
+    return { cx: x, cy: y };
+}
+
+// Load the Bluebikes stations data and plot them
+try {
+  const jsonData = await d3.json(INPUT_BLUEBIKES_JSON_URL);
+  console.log('Loaded JSON Data:', jsonData);
+
+  const stations = jsonData.data.stations;
+  console.log('Stations Array:', stations);
+
+  const circles = svg
+    .selectAll('circle')
+    .data(stations)
+    .enter()
+    .append('circle')
+    .attr('r', 5)
+    .attr('fill', 'steelblue')
+    .attr('stroke', 'white')
+    .attr('stroke-width', 1)
+    .attr('opacity', 0.8);
+
+  function updatePositions() {
+    circles
+      .attr('cx', d => getCoords(d).cx)
+      .attr('cy', d => getCoords(d).cy);
+  }
+
+  updatePositions();
+
+  map.on('move', updatePositions);
+  map.on('zoom', updatePositions);
+  map.on('resize', updatePositions);
+  map.on('moveend', updatePositions);
+} catch (err) {
+  console.error('Error loading stations JSON:', err);
+}
