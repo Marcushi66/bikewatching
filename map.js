@@ -71,16 +71,57 @@ try {
   const stations = jsonData.data.stations;
   console.log('Stations Array:', stations);
 
+  const TRIPS_URL = 'https://dsc106.com/labs/lab07/data/bluebikes-traffic-2024-03.csv';
+  const trips = await d3.csv(TRIPS_URL);
+  console.log("Loaded trips:", trips);
+
+  // Compute departures and arrivals per station
+  const departures = d3.rollup(
+    trips,
+    v => v.length,
+    d => d.start_station_id
+  );
+
+  const arrivals = d3.rollup(
+    trips,
+    v => v.length,
+    d => d.end_station_id
+  );
+
+  // Annotate stations with traffic data
+  stations.forEach(station => {
+    const id = station.short_name ?? station.station_id ?? station.Number;
+
+    const dep = departures.get(id) ?? 0;
+    const arr = arrivals.get(id) ?? 0;
+
+    station.departures   = dep;
+    station.arrivals     = arr;
+    station.totalTraffic = dep + arr;
+  });
+  console.log('Stations with traffic fields:', stations.slice(0, 5));
+
+  const radiusScale = d3.scaleSqrt()
+    .domain([0, d3.max(stations, d => d.totalTraffic)])
+    .range([0, 25]);   
+
   const circles = svg
     .selectAll('circle')
     .data(stations)
     .enter()
     .append('circle')
-    .attr('r', 5)
+    .attr('r', d => radiusScale(d.totalTraffic))
     .attr('fill', 'steelblue')
     .attr('stroke', 'white')
     .attr('stroke-width', 1)
-    .attr('opacity', 0.8);
+    .attr('opacity', 0.6);
+
+  circles
+    .each(function (d) {
+      d3.select(this)
+        .append('title')
+        .text(`${d.totalTraffic} trips (${d.departures} departures, ${d.arrivals} arrivals)`);
+    });
 
   function updatePositions() {
     circles
@@ -94,6 +135,7 @@ try {
   map.on('zoom', updatePositions);
   map.on('resize', updatePositions);
   map.on('moveend', updatePositions);
+
 } catch (err) {
   console.error('Error loading stations JSON:', err);
 }
