@@ -2,6 +2,8 @@
 import mapboxgl from 'https://cdn.jsdelivr.net/npm/mapbox-gl@2.15.0/+esm';
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 const INPUT_BLUEBIKES_JSON_URL = 'https://dsc106.com/labs/lab07/data/bluebikes-stations.json';
+let stationFlow = d3.scaleQuantize().domain([0, 1]).range([0, 0.5, 1]);
+
 
 let timeFilter = -1;
 let allTrips = [];
@@ -113,10 +115,13 @@ try {
     .enter()
     .append('circle')
     .attr('r', d => radiusScale(d.totalTraffic))
-    .attr('fill', 'steelblue')
     .attr('stroke', 'white')
     .attr('stroke-width', 1)
-    .attr('opacity', 0.6);
+    .attr('opacity', 0.6)
+    .style('--departure-ratio', d => {
+      const ratio = d.totalTraffic ? d.departures / d.totalTraffic : 0;
+      return stationFlow(ratio);
+    });
 
   // tooltip
   circles
@@ -213,7 +218,11 @@ function updateScatterPlot(timeFilterValue) {
 
   circles
     .data(filteredStations, d => d.short_name ?? d.station_id ?? d.Number)
-    .attr('r', d => radiusScale(d.totalTraffic));
+    .attr('r', d => radiusScale(d.totalTraffic))
+    .style('--departure-ratio', d => {
+      const ratio = d.totalTraffic ? d.departures / d.totalTraffic : 0;
+      return stationFlow(ratio);
+    });
 }
 
 

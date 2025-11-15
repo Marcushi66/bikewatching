@@ -23,4 +23,50 @@ html, body {
   pointer-events: auto;
 }
 
+#map circle,
+.legend-item {
+  --color-departures: steelblue;
+  --color-arrivals: darkorange;
+
+  --color: color-mix(
+    in oklch,
+    var(--color-departures) calc(100% * var(--departure-ratio)),
+    var(--color-arrivals)
+  );
+}
+
+#map circle {
+  fill: var(--color);
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  font-size: 0.8rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem; 
+}
+
+.legend-label {
+  font-weight: 600;
+  color: #7a7a7a;
+  letter-spacing: 0.08em;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #333;
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background-color: var(--color);
+}
 
