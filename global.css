@@ -9,3 +9,31 @@ body {
   padding: 1em;
 }
 
+/* Time filter layout */
+header.time-filter {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+header.time-filter label {
+  margin-left: auto;
+  font-size: 0.9rem;
+}
+
+#time-slider {
+  width: 260px;
+}
+
+#selected-time {
+  display: block;
+  font-weight: 500;
+}
+
+#any-time {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+}
